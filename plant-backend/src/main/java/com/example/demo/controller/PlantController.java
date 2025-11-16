@@ -1,0 +1,67 @@
+package com.example.demo.controller;
+
+import com.example.demo.entity.Plant;
+import com.example.demo.service.PlantService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/plant-api")
+@CrossOrigin(origins = "*")
+public class PlantController {
+
+    @Autowired
+    private PlantService plantService;
+    
+    @GetMapping("/")
+    public String Home() 
+    {
+    	  return "Plant Home Page";
+    }
+  
+    
+
+    @PostMapping("/add")
+    public ResponseEntity<Plant> addPlant(@RequestBody Plant plant) {
+        Plant savedPlant = plantService.addPlant(plant);
+        return new ResponseEntity<>(savedPlant, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Plant>> getAllPlants() {
+        List<Plant> plants = plantService.getAllPlants();
+        return new ResponseEntity<>(plants, HttpStatus.OK);
+    }
+
+    @GetMapping("/get/{id}")
+    public ResponseEntity<?> getPlantById(@PathVariable int id) {
+        Plant plant = plantService.getPlantById(id);
+        if (plant != null) {
+            return new ResponseEntity<>(plant, HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Plant not found with ID: " + id, HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updatePlant(@PathVariable int id, @RequestBody Plant plant) {
+        if (plantService.getPlantById(id) == null) {
+            return new ResponseEntity<>("Plant not found with ID: " + id, HttpStatus.NOT_FOUND);
+        }
+        plant.setId(id);
+        Plant updatedPlant = plantService.updatePlant(plant);
+        return new ResponseEntity<>(updatedPlant, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deletePlant(@PathVariable int id) {
+        if (plantService.getPlantById(id) == null) {
+            return new ResponseEntity<>("Plant not found with ID: " + id, HttpStatus.NOT_FOUND);
+        }
+        plantService.deletePlantById(id);
+        return new ResponseEntity<>("Plant with ID " + id + " deleted.", HttpStatus.OK);
+    }
+}
